@@ -1,7 +1,9 @@
 use clap::Parser;
 use std::{
     borrow::Cow,
+    fs::File,
     io::{stdin, Read},
+    path::{Path, PathBuf},
 };
 use tao::{
     dpi::PhysicalSize,
@@ -15,10 +17,18 @@ use wry::{
 };
 
 /// Display a Web View, usually for Vega graphs.
-#[derive(Parser)]
+#[derive(Parser, Clone)]
 struct Args {
-    /// URL to display
-    url: Option<String>,
+    /// vega-lite specification for this visualization
+    spec: String,
+
+    /// file containing a HTML template for the page
+    #[arg(long)]
+    page: Option<PathBuf>,
+
+    /// file containing data to visualize (default is stdin)
+    #[arg(long)]
+    data: Option<PathBuf>,
 
     /// The window title.
     #[arg(long)]
@@ -37,43 +47,72 @@ fn main() -> wry::Result<()> {
     let args = Args::parse();
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
-        .with_title(args.title.unwrap_or("Vega View".to_string()))
+        .with_title(args.title.as_deref().unwrap_or("Vega View"))
         .with_inner_size(PhysicalSize::new(
             args.width.unwrap_or(1000),
             args.height.unwrap_or(800),
         ))
+        .with_decorations(true)
         .build(&event_loop)
         .unwrap();
     let _webview = WebViewBuilder::new(&window)
-        .with_custom_protocol("view".to_string(), handler)
-        .with_url(args.url.unwrap_or("view:test".to_string()))
+        .with_custom_protocol("view".to_string(), move |r| handler(&args, r))
+        .with_url("view://local.org/page")
+        .with_devtools(true)
         .build()?;
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
 
         match event {
-            Event::NewEvents(StartCause::Init) => println!("Wry has started!"),
+            Event::NewEvents(StartCause::Init) => {
+                // println!("Wry has started!")
+            }
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 ..
             } => {
                 *control_flow = ControlFlow::Exit;
-                println!("Window closed!")
+                // println!("Window closed!")
             }
             _ => (),
         }
     });
 }
 
-fn handler(request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]>> {
-    println!("{request:?}");
+fn handler(args: &Args, request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]>> {
+    // println!("{request:?}");
     match *request.method() {
         Method::GET => match request.uri().to_string().as_str() {
-            "view:test" => Response::builder()
-                .body(Cow::from("Hi there!".as_bytes()))
-                .unwrap(),
-            "view:stdin" => Response::builder().body(Cow::from(all_input())).unwrap(),
+            "view://local.org/page" => {
+                let body = if let Some(path) = &args.page {
+                    Cow::from(file_contents(path.as_path()))
+                } else {
+                    Cow::from(PAGE)
+                };
+                Response::builder()
+                    .header("Content-Type", "text/html")
+                    .body(body)
+                    .unwrap()
+            }
+            "view://local.org/spec" => {
+                let body = Cow::from(args.spec.clone().into_bytes());
+                Response::builder()
+                    .header("Content-Type", "application/json")
+                    .body(body)
+                    .unwrap()
+            }
+            "view://local.org/data" => {
+                let body = if let Some(path) = &args.data {
+                    Cow::from(file_contents(path.as_path()))
+                } else {
+                    Cow::from(all_input())
+                };
+                Response::builder()
+                    .header("Content-Type", "application/json")
+                    .body(body)
+                    .unwrap()
+            }
             _ => Response::builder()
                 .status(StatusCode::NOT_FOUND)
                 .body(Cow::from("Not found".as_bytes()))
@@ -88,6 +127,35 @@ fn handler(request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]>> {
 
 fn all_input() -> Vec<u8> {
     let mut buf = Vec::<u8>::new();
-    stdin().read_to_end(&mut buf).expect("unable to read stdin");
+    let _n = stdin().read_to_end(&mut buf).expect("unable to read stdin");
+    // println!("data length = {_n}");
     buf
 }
+
+fn file_contents(path: &Path) -> Vec<u8> {
+    let mut handle = File::open(path).expect("file not found");
+    let mut buf = Vec::<u8>::new();
+    handle.read_to_end(&mut buf).expect("unable to read file");
+    buf
+}
+
+const PAGE: &[u8] = br#"
+<!doctype html>
+<html>
+    <head>
+        <meta charset='utf-8' />
+        <script src='https://cdn.jsdelivr.net/npm/vega@5.27.0'></script>
+        <script src='https://cdn.jsdelivr.net/npm/vega-lite@5.17.0'></script>
+        <script src='https://cdn.jsdelivr.net/npm/vega-embed@6.24.0'></script>
+        <style>
+            #vis { width: 100% }
+        </style>
+    </head>
+    <body>
+        <div id='vis'></div>
+        <script  type="text/javascript">
+            vegaEmbed('#vis', '/spec', { actions: false })
+        </script>
+    </body>
+</html>
+"#;
