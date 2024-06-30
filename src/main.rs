@@ -4,6 +4,7 @@ use std::{
     io::{stdin, Read},
 };
 use tao::{
+    dpi::PhysicalSize,
     event::{Event, StartCause, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
@@ -22,6 +23,14 @@ struct Args {
     /// The window title.
     #[arg(long)]
     title: Option<String>,
+
+    /// The window width.
+    #[arg(long)]
+    width: Option<u32>,
+
+    /// The window height.
+    #[arg(long)]
+    height: Option<u32>,
 }
 
 fn main() -> wry::Result<()> {
@@ -29,6 +38,10 @@ fn main() -> wry::Result<()> {
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
         .with_title(args.title.unwrap_or("Vega View".to_string()))
+        .with_inner_size(PhysicalSize::new(
+            args.width.unwrap_or(1000),
+            args.height.unwrap_or(800),
+        ))
         .build(&event_loop)
         .unwrap();
     let _webview = WebViewBuilder::new(&window)
