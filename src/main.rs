@@ -16,6 +16,9 @@ use wry::{
     WebViewBuilder,
 };
 
+const SCHEME: &str = "view";
+const BASE: &str = "view://local/page";
+
 /// Display a Web View, usually for Vega graphs.
 #[derive(Parser, Clone)]
 struct Args {
@@ -56,8 +59,8 @@ fn main() -> wry::Result<()> {
         .build(&event_loop)
         .unwrap();
     let _webview = WebViewBuilder::new(&window)
-        .with_custom_protocol("view".to_string(), move |r| handler(&args, r))
-        .with_url("view://local.org/page")
+        .with_custom_protocol(SCHEME.to_string(), move |r| handler(&args, r))
+        .with_url(BASE)
         .with_devtools(true)
         .build()?;
 
@@ -83,8 +86,8 @@ fn main() -> wry::Result<()> {
 fn handler(args: &Args, request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]>> {
     // println!("{request:?}");
     match *request.method() {
-        Method::GET => match request.uri().to_string().as_str() {
-            "view://local.org/page" => {
+        Method::GET => match request.uri().path() {
+            "/page" => {
                 let body = if let Some(path) = &args.page {
                     Cow::from(file_contents(path.as_path()))
                 } else {
@@ -95,14 +98,14 @@ fn handler(args: &Args, request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]
                     .body(body)
                     .unwrap()
             }
-            "view://local.org/spec" => {
+            "/spec" => {
                 let body = Cow::from(args.spec.clone().into_bytes());
                 Response::builder()
                     .header("Content-Type", "application/json")
                     .body(body)
                     .unwrap()
             }
-            "view://local.org/data" => {
+            "/data" => {
                 let body = if let Some(path) = &args.data {
                     Cow::from(file_contents(path.as_path()))
                 } else {
