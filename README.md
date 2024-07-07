@@ -55,7 +55,7 @@ Parameters:
 
 Example:
 
-```
+```nushell
 open example.json | vega view "Stacked Bar Example" (vega bar b --category=t --subcategory=a)
 ```
 
@@ -81,7 +81,7 @@ Parameters:
 ```
 
 Example:
-```
+```nushell
 open example.json | vega view "Time Series Example" (vega series b t --category a)
 ```
 
@@ -107,7 +107,7 @@ Parameters:
 
 Example:
 
-```
+```nushell
 open example.json | vega view "Scatter Plot Example" (vega scatter b t --category a)
 ```
 
