@@ -2,15 +2,28 @@
 
 Display [nushell](https://www.nushell.sh) tables using [Vega Lite](https://vega.github.io/vega-lite/) in a webview.
 
+## Build
+
+The prerequisites are [nushell, found here](https://www.nushell.sh/#get-nu), and a webview.   You probably already have the webview but check the [platform specific notes for the wry project](https://github.com/tauri-apps/wry?tab=readme-ov-file#platform-specific-notes).  (This project uses wry.)
+
+Build the release binary.  This will be used by the nushell scripts below.
+
+```
+> cargo build --release
+```
+
+
 ## Usage
 
+First run `nu` then: 
+
 ```nushell
-use vega.nu
+use vega.nu                           # load the vega nushell module.                    
 vega view <title> <spec>              # visualize the input with a given title and vega-lite specification
-vega bar {flags} <value>              # generate a vega specification for a bar graph
-vega series {flags} <value> <time>    # generate a vega specification for a time series plot
-vega scatter {flags} <value> <domain> # generate a vega specification for scatter
-vega flip                             # exchange the x and y axes of a vega specification
+vega bar {flags} <value>              # generate a specification for a bar graph
+vega series {flags} <value> <time>    # generate a specification for a time series plot
+vega scatter {flags} <value> <domain> # generate a specification for a scatter plot
+vega flip                             # exchange the x and y axes of a specification
 ```
 
 For example, to visualize the `b` column of the table in `example.json`:
@@ -123,3 +136,29 @@ let spec = {
 }
 $my_data | vega view "My Custom Visualization" $spec
 ```
+
+## The Webview
+
+The webview is created and populated by a rust binary `vega-view`.   The nushell scripts find it from the environment via `$env.vega_view_bin`.  It uses [wry](https://github.com/tauri-apps/wry) to access the platform's webview component. 
+
+Inputs to `vega-view` are JSON.  The `vega view` script wraps `vega-view` and takes care of conversions.  
+
+Some options are only available by calling `vega-view` directly.
+
+```
+> ^$env.vega_view_bin --help
+Display a Web View, usually for Vega graphs
+
+Usage: vega-view [OPTIONS] <SPEC>
+
+Arguments:
+  <SPEC>  vega-lite specification for this visualization
+
+Options:
+      --page <PAGE>      file containing a HTML template for the page
+      --data <DATA>      file containing data to visualize (default is stdin)
+      --title <TITLE>    The window title
+      --width <WIDTH>    The window width
+      --height <HEIGHT>  The window height
+  -h, --help             Print help
+  ```
