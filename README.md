@@ -40,7 +40,7 @@ let data = open example.json
 $data | vega view $title $spec
 ```
 
-This produces a single bar with height representing the sum of the `b` column in the data.  A more interesting bar graph would divide the data up into categories:
+This produces a single bar with height representing the sum of the `b` column in the data.  A more interesting bar graph would divide the data up into categories. Identifying the category fields and putting it as a one-liner:
 
 ```nushell
 open example.json | vega view "Stacked Bar Example" (vega bar b --category=t --subcategory=a)
@@ -168,4 +168,5 @@ Options:
       --title <TITLE>    The window title
       --width <WIDTH>    The window width
       --height <HEIGHT>  The window height
-  -h, --help             Print help  ```
+  -h, --help             Print help  
+```
