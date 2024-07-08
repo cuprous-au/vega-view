@@ -132,6 +132,8 @@ export def scatter [
 
 # swap the x and y axis of a vega-lite specification
 export def flip [] {
-  let spec = $in
-  $spec | update encoding.y $spec.encoding.x | update encoding.x $spec.encoding.y
+  mut spec = $in
+  let x = $spec.encoding.x?
+  let y = $spec.encoding.y?
+  $spec | upsert encoding.y $x | upsert encoding.x $y
 }
