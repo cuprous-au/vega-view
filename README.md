@@ -137,24 +137,24 @@ open example.json | vega view "Scatter Plot Example" (vega scatter b t --categor
 
 ### Writing a Specification
 
-The [vega-lite gallery](https://vega.github.io/vega-lite/examples/)  is a good place to start when developing a visualization.  You can adapt one of these specifications by changing the field names to match your data. You must also change the data url to `/data`.  ie:
+The [vega-lite gallery](https://vega.github.io/vega-lite/examples/)  is a good place to start when developing a visualization.  You can adapt one of these specifications by changing the field names to match your data.  You can omit the `data` section of the specification.
 
-```nushell
-let spec = {
+## The `vega-view`  Executable
+
+The `vega-view` executable creates and controls the webview.   The `vega view` nushell command wraps the executable and takes care of conversions from nushell tables.  The wrapper locates the executable via the environment variable `$env.vega_view_bin`.  
+
+It is possible to use `vega-view` directly without the nushell scripting.  By default JSON data is supplied on the standard input and a JSON vega-lite specification is given as an argument. Ensure that the data url in the specification is `/data`.  ie:
+
+
+```JSON
+{
   ...
   data: { url: '/data' }, 
   ...  
 }
-$my_data | vega view "My Custom Visualization" $spec
 ```
 
-## The `vega-view`  Executable
-
-The `vega-view` executable creates and controls the webview.  Inputs are JSON for data and specifications and HTML for the page template.  
-
-The `vega view` nushell command wraps the executable and takes care of conversions from nushell tables.  The wrapper locates the executable via the environment variable `$env.vega_view_bin`.  
-
-It is possible to use `vega-view` directly without the nushell scripting: 
+The full command is:
 
 ```
 Usage: vega-view [OPTIONS] <SPEC>
