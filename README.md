@@ -4,13 +4,17 @@ Display [nushell](https://www.nushell.sh) tables using [Vega Lite](https://vega.
 
 ## Build
 
-The prerequisites are [nushell, found here](https://www.nushell.sh/#get-nu), and a webview.   You probably already have the webview but check the [platform specific notes for the wry project](https://github.com/tauri-apps/wry?tab=readme-ov-file#platform-specific-notes).  (This project uses wry.)
-
-Build the release binary.  This will be used by the nushell scripts below.
+This is a rust project so [rust up](https://rustup.rs)!  The executable, `vega-view`, can then be built:
 
 ```
-> cargo build --release
+cargo build --release
 ```
+
+### Prerequisites
+
+To run `vega-view` a webview component must be present.  You probably already have one as part of your platform but check the [platform specific notes for the wry project](https://github.com/tauri-apps/wry?tab=readme-ov-file#platform-specific-notes).  (This project uses wry.) 
+
+The supporting scripts require [nushell, found here](https://www.nushell.sh/#get-nu).
 
 
 ## Usage
@@ -26,16 +30,17 @@ vega scatter {flags} <value> <domain> # generate a specification for a scatter p
 vega flip                             # exchange the x and y axes of a specification
 ```
 
-For example, to visualize the `b` column of the table in `example.json`:
+For example, the following nushell script will visualize the `b` column of the table in `example.json`:
 
 ```nushell
+use vega.nu
 let title = "My Example"
 let spec = vega bar b
 let data = open example.json
 $data | vega view $title $spec
 ```
 
-This produces a single bar with height representing the sum of the `b` column.  A more interesting bar graph would divide the data up into categories:
+This produces a single bar with height representing the sum of the `b` column in the data.  A more interesting bar graph would divide the data up into categories:
 
 ```nushell
 open example.json | vega view "Stacked Bar Example" (vega bar b --category=t --subcategory=a)
@@ -50,6 +55,8 @@ You can write your own specification or use one of the built in ones below.
 ### Bar Graph
 
 A vega-lite specification for a bar graph.
+
+![Bar Graph](resources/bar-example.png)
 
 Usage:
 ```
@@ -76,6 +83,8 @@ open example.json | vega view "Stacked Bar Example" (vega bar b --category=t --s
 
 A vega-lite specification for a time series plot.
 
+![Series Plot](resources/series-example.png)
+
 Usage:
 ```
   > series {flags} <value> <time> 
@@ -101,6 +110,8 @@ open example.json | vega view "Time Series Example" (vega series b t --category 
 ### Scatter Plot
 
 A vega-lite specification for a scatter plot.
+
+![Scatter Plot](resources/scatter-example.png)
 
 Usage:
 ```
@@ -137,18 +148,15 @@ let spec = {
 $my_data | vega view "My Custom Visualization" $spec
 ```
 
-## The Webview
+## The `vega-view`  Executable
 
-The webview is created and populated by a rust binary `vega-view`.   The nushell scripts find it from the environment via `$env.vega_view_bin`.  It uses [wry](https://github.com/tauri-apps/wry) to access the platform's webview component. 
+The `vega-view` executable creates and controls the webview.  Inputs are JSON for data and specifications and HTML for the page template.  
 
-Inputs to `vega-view` are JSON.  The `vega view` script wraps `vega-view` and takes care of conversions.  
+The `vega view` nushell command wraps the executable and takes care of conversions from nushell tables.  The wrapper locates the executable via the environment variable `$env.vega_view_bin`.  
 
-Some options are only available by calling `vega-view` directly.
+It is possible to use `vega-view` directly without the nushell scripting: 
 
 ```
-> ^$env.vega_view_bin --help
-Display a Web View, usually for Vega graphs
-
 Usage: vega-view [OPTIONS] <SPEC>
 
 Arguments:
@@ -160,5 +168,4 @@ Options:
       --title <TITLE>    The window title
       --width <WIDTH>    The window width
       --height <HEIGHT>  The window height
-  -h, --help             Print help
-  ```
+  -h, --help             Print help  ```

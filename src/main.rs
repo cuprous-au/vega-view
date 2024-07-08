@@ -19,7 +19,7 @@ use wry::{
 const SCHEME: &str = "view";
 const BASE: &str = "view://local/page";
 
-/// Display a Web View, usually for Vega graphs.
+/// Display a Web View, usually for Vega visualizations.
 #[derive(Parser, Clone)]
 struct Args {
     /// vega-lite specification for this visualization
