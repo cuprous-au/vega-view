@@ -3,7 +3,7 @@ export-env {
 }
 
 export def view [title: string spec: record] {
-    to json | ^$env.vega_view_bin --title $title  ($spec | to json)
+    to json | ^$env.vega_view_bin --title $title  ($spec | upsert data { url: "/data"} | to json)
 }
 
 # vega-lite specification for a bar graph
@@ -15,7 +15,6 @@ export def bar [
     ] {
     {
       '$schema': 'https://vega.github.io/schema/vega-lite/v5.json',
-      data: { url: '/data' }, 
       mark: { 'type': 'bar', tooltip: true } ,
       "width": "container",
       encoding: {
@@ -62,7 +61,6 @@ export def series [
     let mark = if $area { "area" } else { "line" }
     {
       '$schema': 'https://vega.github.io/schema/vega-lite/v5.json',
-      data: { url: '/data' }, 
       mark: { 
         type: $mark,
         tooltip: true 
@@ -101,7 +99,6 @@ export def scatter [
 ] {
   {
     '$schema': 'https://vega.github.io/schema/vega-lite/v5.json',
-    data: { url: '/data' }, 
     mark: { 'type': 'point', tooltip: true } ,
     "width": "container",
     encoding: {
