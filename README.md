@@ -146,7 +146,7 @@ The `vega-view` executable creates and controls the webview.   The `vega view` n
 It is possible to use `vega-view` directly without the nushell scripting.  By default JSON data is supplied on the standard input and a JSON vega-lite specification is given as an argument. Ensure that the data url in the specification is `/data`.  ie:
 
 
-```JSON
+```
 {
   ...
   data: { url: '/data' }, 
