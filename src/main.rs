@@ -1,9 +1,11 @@
 use clap::Parser;
 use std::{
     borrow::Cow,
+    fmt::Debug,
     fs::File,
     io::{stdin, Read},
     path::{Path, PathBuf},
+    time::Instant,
 };
 use tao::{
     dpi::PhysicalSize,
@@ -48,10 +50,15 @@ struct Args {
     /// The window height.
     #[arg(long)]
     height: Option<u32>,
+
+    /// Debug logging
+    #[arg(long)]
+    debug: bool,
 }
 
 fn main() -> wry::Result<()> {
     let args = Args::parse();
+    let log = Log::new(args.debug);
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new()
         .with_title(args.title.as_deref().unwrap_or("Vega View"))
@@ -63,7 +70,7 @@ fn main() -> wry::Result<()> {
         .build(&event_loop)
         .unwrap();
     let _webview = WebViewBuilder::new(&window)
-        .with_custom_protocol(SCHEME.to_string(), move |r| handler(&args, r))
+        .with_custom_protocol(SCHEME.to_string(), move |r| handler(log, &args, r))
         .with_url(BASE)
         .with_devtools(true)
         .build()?;
@@ -72,23 +79,24 @@ fn main() -> wry::Result<()> {
         *control_flow = ControlFlow::Wait;
 
         match event {
-            Event::NewEvents(StartCause::Init) => {
-                // println!("Wry has started!")
-            }
+            Event::NewEvents(StartCause::WaitCancelled { .. }) => {}
+            Event::MainEventsCleared => {}
+            Event::RedrawEventsCleared => {}
+            Event::DeviceEvent { .. } => {}
             Event::WindowEvent {
                 event: WindowEvent::CloseRequested,
                 ..
             } => {
                 *control_flow = ControlFlow::Exit;
-                // println!("Window closed!")
+                log.print(&event)
             }
-            _ => (),
+            _ => log.print(&event),
         }
     });
 }
 
-fn handler(args: &Args, request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]>> {
-    // println!("{request:?}");
+fn handler(log: Log, args: &Args, request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]>> {
+    log.print(&request);
     match *request.method() {
         Method::GET => match request.uri().path() {
             "/page" => {
@@ -126,6 +134,7 @@ fn handler(args: &Args, request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]
                 } else {
                     Cow::from(all_input())
                 };
+                log.print(format!("Data Length {}", body.len()));
                 Response::builder()
                     .header("Content-Type", "application/json")
                     .body(body)
@@ -146,7 +155,6 @@ fn handler(args: &Args, request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]
 fn all_input() -> Vec<u8> {
     let mut buf = Vec::<u8>::new();
     let _n = stdin().read_to_end(&mut buf).expect("unable to read stdin");
-    // println!("data length = {_n}");
     buf
 }
 
@@ -159,3 +167,25 @@ fn file_contents(path: &Path) -> Vec<u8> {
 
 const PAGE: &[u8] = include_bytes!("vega-page.html");
 const SCRIPT: &[u8] = include_bytes!("vega-all.js");
+
+#[derive(Debug, Clone, Copy)]
+enum Log {
+    Enabled(Instant),
+    Disabled,
+}
+
+impl Log {
+    fn new(enabled: bool) -> Self {
+        if enabled {
+            Self::Enabled(Instant::now())
+        } else {
+            Self::Disabled
+        }
+    }
+    fn print(self, item: impl Debug) {
+        match self {
+            Self::Enabled(start) => println!("{} {item:?}", start.elapsed().as_millis()),
+            Self::Disabled => {}
+        }
+    }
+}
