@@ -4,18 +4,19 @@ Display [nushell](https://www.nushell.sh) tables using [Vega Lite](https://vega.
 
 ## Build
 
-This is a rust project so [rust up](https://rustup.rs)!  The executable, `vega-view`, can then be built:
+This is a rust project so [rust up](https://rustup.rs)! The supporting scripts require nushell, [install here](https://www.nushell.sh/#get-nu). Next, download the Vega prerequisites:
+
+```
+nu download-vega.nu
+```
+
+The executable, `vega-view`, can now be built:
 
 ```
 cargo build --release
 ```
 
-### Prerequisites
-
 To run `vega-view` a webview component must be present.  You probably already have one as part of your platform but check the [platform specific notes for the wry project](https://github.com/tauri-apps/wry?tab=readme-ov-file#platform-specific-notes).  (This project uses wry.) 
-
-The supporting scripts require [nushell, found here](https://www.nushell.sh/#get-nu).
-
 
 ## Usage
 
@@ -164,9 +165,9 @@ Arguments:
 
 Options:
       --page <PAGE>      file containing a HTML template for the page
+      --script <SCRIPT>  file containing javascript used in the page
       --data <DATA>      file containing data to visualize (default is stdin)
       --title <TITLE>    The window title
       --width <WIDTH>    The window width
       --height <HEIGHT>  The window height
-  -h, --help             Print help  
-```
+  -h, --help             Print help```
