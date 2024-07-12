@@ -29,6 +29,10 @@ struct Args {
     #[arg(long)]
     page: Option<PathBuf>,
 
+    /// file containing javascript used in the page
+    #[arg(long)]
+    script: Option<PathBuf>,
+
     /// file containing data to visualize (default is stdin)
     #[arg(long)]
     data: Option<PathBuf>,
@@ -98,6 +102,17 @@ fn handler(args: &Args, request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]
                     .body(body)
                     .unwrap()
             }
+            "/script" => {
+                let body = if let Some(path) = &args.script {
+                    Cow::from(file_contents(path.as_path()))
+                } else {
+                    Cow::from(SCRIPT)
+                };
+                Response::builder()
+                    .header("Content-Type", "text/javascript")
+                    .body(body)
+                    .unwrap()
+            }
             "/spec" => {
                 let body = Cow::from(args.spec.clone().into_bytes());
                 Response::builder()
@@ -142,23 +157,5 @@ fn file_contents(path: &Path) -> Vec<u8> {
     buf
 }
 
-const PAGE: &[u8] = br#"
-<!doctype html>
-<html>
-    <head>
-        <meta charset='utf-8' />
-        <script src='https://cdn.jsdelivr.net/npm/vega@5.27.0'></script>
-        <script src='https://cdn.jsdelivr.net/npm/vega-lite@5.17.0'></script>
-        <script src='https://cdn.jsdelivr.net/npm/vega-embed@6.24.0'></script>
-        <style>
-            #vis { width: 100% }
-        </style>
-    </head>
-    <body>
-        <div id='vis'></div>
-        <script  type="text/javascript">
-            vegaEmbed('#vis', '/spec', { actions: false })
-        </script>
-    </body>
-</html>
-"#;
+const PAGE: &[u8] = include_bytes!("vega-page.html");
+const SCRIPT: &[u8] = include_bytes!("vega-all.js");
