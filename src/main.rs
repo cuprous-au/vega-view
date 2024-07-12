@@ -20,22 +20,24 @@ use wry::{
 
 const SCHEME: &str = "view";
 const BASE: &str = "view://local/page";
+const PAGE: &[u8] = include_bytes!("vega-page.html");
+const SCRIPT: &[u8] = include_bytes!("vega-all.js");
 
 /// Display a Web View, usually for Vega visualizations.
-#[derive(Parser, Clone)]
+#[derive(Parser, Clone, Debug)]
 struct Args {
-    /// vega-lite specification for this visualization
+    /// A vega-lite specification for this visualization.
     spec: String,
 
-    /// file containing a HTML template for the page
+    /// A file containing a HTML template for the page.
     #[arg(long)]
     page: Option<PathBuf>,
 
-    /// file containing javascript used in the page
+    /// A file containing javascript used in the page.
     #[arg(long)]
     script: Option<PathBuf>,
 
-    /// file containing data to visualize (default is stdin)
+    /// A file containing data to visualize (default is stdin).
     #[arg(long)]
     data: Option<PathBuf>,
 
@@ -51,7 +53,7 @@ struct Args {
     #[arg(long)]
     height: Option<u32>,
 
-    /// Debug logging
+    /// Turn on debug logging.
     #[arg(long)]
     debug: bool,
 }
@@ -95,6 +97,7 @@ fn main() -> wry::Result<()> {
     });
 }
 
+/// Respond to a local http request.
 fn handler(log: Log, args: &Args, request: Request<Vec<u8>>) -> Response<Cow<'static, [u8]>> {
     log.print(&request);
     match *request.method() {
@@ -152,12 +155,14 @@ fn handler(log: Log, args: &Args, request: Request<Vec<u8>>) -> Response<Cow<'st
     }
 }
 
+/// All the bytes from stdin.
 fn all_input() -> Vec<u8> {
     let mut buf = Vec::<u8>::new();
     let _n = stdin().read_to_end(&mut buf).expect("unable to read stdin");
     buf
 }
 
+/// All the bytes in a file.
 fn file_contents(path: &Path) -> Vec<u8> {
     let mut handle = File::open(path).expect("file not found");
     let mut buf = Vec::<u8>::new();
@@ -165,9 +170,7 @@ fn file_contents(path: &Path) -> Vec<u8> {
     buf
 }
 
-const PAGE: &[u8] = include_bytes!("vega-page.html");
-const SCRIPT: &[u8] = include_bytes!("vega-all.js");
-
+/// A pimitive logger with millisecond timestamps.
 #[derive(Debug, Clone, Copy)]
 enum Log {
     Enabled(Instant),
