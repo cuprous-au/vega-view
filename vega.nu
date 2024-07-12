@@ -2,8 +2,14 @@ export-env {
     $env.vega_view_bin = ($env.FILE_PWD | path join "target" "release" "vega-view") 
 }
 
-export def view [title: string spec: record] {
-    to json | ^$env.vega_view_bin --title $title  ($spec | upsert data { url: "/data"} | to json)
+# Display a Vega visualization of the input data in a new window.
+export def view [
+  spec: record # a vega-lite specification 
+  --title: string = "Vega View" # title for the window
+  --width: number = 1000 # width of the window
+  --height: number = 800 # height of the window
+] {
+    to json | ^$env.vega_view_bin --title $title --width $width --height $height ($spec | upsert data { url: "/data"} | to json)
 }
 
 # vega-lite specification for a bar graph

@@ -35,25 +35,20 @@ For example, the following nushell script will visualize the `b` column of the t
 
 ```nushell
 use vega.nu
-let title = "My Example"
 let spec = vega bar b
 let data = open example.json
-$data | vega view $title $spec
+$data | vega view $spec
 ```
 
 This produces a single bar with height representing the sum of the `b` column in the data.  A more interesting bar graph would divide the data up into categories. Identifying the category fields and putting it as a one-liner:
 
 ```nushell
-open example.json | vega view "Stacked Bar Example" (vega bar b --category=t --subcategory=a)
+open example.json | vega view (vega bar b --category=t --subcategory=a)
 ```
 
-With nushell's excellent data handling abilities you can equally easily visualize CSV, SQLite, JSON and other data sources.  
+With nushell's excellent data handling abilities you can equally easily visualize CSV, SQLite, JSON and other data sources.  You can write your own specification or use one of the built in ones below.  
 
-## Visualizations
-
-You can write your own specification or use one of the built in ones below.  
-
-### Bar Graph
+## Bar Graph
 
 A vega-lite specification for a bar graph.
 
@@ -77,10 +72,10 @@ Parameters:
 Example:
 
 ```nushell
-open example.json | vega view "Stacked Bar Example" (vega bar b --category=t --subcategory=a)
+open example.json | vega view --title "Stacked Bar Example" (vega bar b --category=t --subcategory=a)
 ```
 
-### Time Series Plot
+## Time Series Plot
 
 A vega-lite specification for a time series plot.
 
@@ -105,10 +100,10 @@ Parameters:
 
 Example:
 ```nushell
-open example.json | vega view "Time Series Example" (vega series b t --category a)
+open example.json | vega view --title "Time Series Example" (vega series b t --category a)
 ```
 
-### Scatter Plot
+## Scatter Plot
 
 A vega-lite specification for a scatter plot.
 
@@ -133,12 +128,34 @@ Parameters:
 Example:
 
 ```nushell
-open example.json | vega view "Scatter Plot Example" (vega scatter b t --category a)
+open example.json | vega view --title "Scatter Plot Example" (vega scatter b t --category a)
 ```
 
-### Writing a Specification
+## Writing a Specification
 
 The [vega-lite gallery](https://vega.github.io/vega-lite/examples/)  is a good place to start when developing a visualization.  You can adapt one of these specifications by changing the field names to match your data.  You can omit the `data` section of the specification.
+
+## View Options
+
+The `vega view` nushell command takes several options controlling how it displaya a Vega visualization of the input data in a window. (We have seen the `--title` option in the examples above.)
+
+Usage:
+```
+  > view {flags} <spec> 
+```
+
+Flags:
+```
+  --title <String> - title for the window (default: 'Vega View')
+  --width <Number> - width of the window (default: 1000)
+  --height <Number> - height of the window (default: 800)
+  -h, --help - Display the help message for this command
+```
+
+Parameters:
+```  
+spec <record>: a vega-lite specification
+```
 
 ## The `vega-view`  Executable
 
