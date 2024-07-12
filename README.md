@@ -170,4 +170,5 @@ Options:
       --title <TITLE>    The window title
       --width <WIDTH>    The window width
       --height <HEIGHT>  The window height
-  -h, --help             Print help```
+  -h, --help             Print help
+  ```
