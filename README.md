@@ -52,7 +52,7 @@ With nushell's excellent data handling abilities you can equally easily visualiz
 
 A vega-lite specification for a bar graph.
 
-![Bar Graph](resources/bar-example.png)
+![Bar Graph](screenshots/bar-example.png)
 
 Usage:
 ```
@@ -79,7 +79,7 @@ open example.json | vega view --title "Stacked Bar Example" (vega bar b --catego
 
 A vega-lite specification for a time series plot.
 
-![Series Plot](resources/series-example.png)
+![Series Plot](screenshots/series-example.png)
 
 Usage:
 ```
@@ -107,7 +107,7 @@ open example.json | vega view --title "Time Series Example" (vega series b t --c
 
 A vega-lite specification for a scatter plot.
 
-![Scatter Plot](resources/scatter-example.png)
+![Scatter Plot](screenshots/scatter-example.png)
 
 Usage:
 ```
