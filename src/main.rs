@@ -187,7 +187,7 @@ impl Log {
     }
     fn print(self, item: impl Debug) {
         match self {
-            Self::Enabled(start) => println!("{} {item:?}", start.elapsed().as_millis()),
+            Self::Enabled(start) => eprintln!("{} {item:?}", start.elapsed().as_millis()),
             Self::Disabled => {}
         }
     }
