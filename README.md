@@ -23,12 +23,12 @@ To run `vega-view` a webview component must be present.  You probably already ha
 First run `nu` then: 
 
 ```nushell
-use vega.nu                           # load the vega nushell module.                    
-vega view <title> <spec>              # visualize the input with a given title and vega-lite specification
-vega bar {flags} <value>              # generate a specification for a bar graph
-vega series {flags} <value> <time>    # generate a specification for a time series plot
-vega scatter {flags} <value> <domain> # generate a specification for a scatter plot
-vega flip                             # exchange the x and y axes of a specification
+use vega.nu                   # load the vega nushell module.                    
+vega view <spec>              # visualize the input with a vega-lite specification
+vega bar <value>              # a specification for a bar graph
+vega series <value> <time>    # a specification for a time series plot
+vega scatter <value> <domain> # a specification for a scatter plot
+vega flip                     # exchange the x and y axes of a specification
 ```
 
 For example, the following nushell script will visualize the `b` column of the table in `example.json`:
