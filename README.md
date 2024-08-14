@@ -189,3 +189,11 @@ Options:
       --height <HEIGHT>  The window height
   -h, --help             Print help
   ```
+
+  # LICENSE
+
+ Material derived from the Vega project including vega-all.js is Copyright (c) 2024, University of Washington Interactive Data Lab.  See VEGA-LICENSE.
+
+ All other material is Copyright (c) 2024 Cuprous Pty Ltd Australia.  See LICENSE.
+
+
