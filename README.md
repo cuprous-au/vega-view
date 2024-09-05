@@ -1,6 +1,6 @@
 # vega view
 
-Display [nushell](https://www.nushell.sh) tables using [Vega Lite](https://vega.github.io/vega-lite/) in a webview.
+Display [nushell](https://www.nushell.sh) tables using [Vega Lite](https://vega.github.io/vega-lite/) in a webview. Not to be confused with the [Vega View API](https://vega.github.io/vega/docs/api/view/). 
 
 ## Build
 
