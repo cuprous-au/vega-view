@@ -12,6 +12,44 @@ export def view [
     to json | ^$env.vega_view_bin --title $title --width $width --height $height ($spec | upsert data { url: "/data"} | to json)
 }
 
+# Returns a standalone html file ready to be opened
+export def html [
+    spec: record # a vega-lite specification
+    --title: string = "Vega View" # title for the HTML page
+] {
+    mut data = $in
+    $data = $spec | upsert data.values $data
+    $"<!doctype html>
+    <html>
+    <head>
+    <title>($title)</title>
+    <meta charset='utf-8'/>
+
+    <script src='https://cdn.jsdelivr.net/npm/vega@5.30.0'></script>
+    <script src='https://cdn.jsdelivr.net/npm/vega-lite@5.21.0'></script>
+    <script src='https://cdn.jsdelivr.net/npm/vega-embed@6.26.0'></script>
+
+    <style media='screen'>
+      .vega-actions a {
+        margin-right: 5px;
+      }
+      #vis {
+        width: 100%
+      }
+    </style>
+    </head>
+    <body>
+    <h2>($title)</h2>
+    <div id='vis' title='($title)'/>
+    <script>
+        var vlSpec = ($data | to json -i 2);
+        vegaEmbed\('#vis', vlSpec\);
+    </script>
+    </body>
+    </html>
+    "
+}
+
 # vega-lite specification for a bar graph
 export def bar [
       value: string          # field name for the bar height
