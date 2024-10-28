@@ -71,7 +71,22 @@ fn main() -> wry::Result<()> {
         .with_decorations(true)
         .build(&event_loop)
         .unwrap();
-    let _webview = WebViewBuilder::new(&window)
+
+    let webview_builder = if cfg!(not(any(
+        target_os = "windows",
+        target_os = "macos",
+        target_os = "ios",
+        target_os = "android",
+    ))) {
+        use tao::platform::unix::WindowExtUnix;
+        use wry::WebViewBuilderExtUnix;
+        let vbox = window.default_vbox().unwrap();
+        WebViewBuilder::new_gtk(vbox)
+    } else {
+        WebViewBuilder::new(&window)
+    };
+
+    let _webview = webview_builder
         .with_custom_protocol(SCHEME.to_string(), move |r| handler(log, &args, r))
         .with_url(BASE)
         .with_devtools(true)
